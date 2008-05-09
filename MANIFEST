@@ -1,0 +1,10 @@
+lib/POE/Component/TFTPd.pm
+lib/POE/Component/TFTPd/Client.pm
+Changes
+LICENSE
+Makefile.PL
+MANIFEST
+README
+examples/tftpd.pl
+t/001_load.t
+t/002_create.t
