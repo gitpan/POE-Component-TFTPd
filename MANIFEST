@@ -1,3 +1,5 @@
+.gitignore
+.Makefile.PL.swp
 Changes
 examples/tftpd.pl
 inc/Module/Install.pm
