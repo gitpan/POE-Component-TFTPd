@@ -6,7 +6,7 @@ POE::Component::TFTPd - A tftp-server, implemented through POE
 
 =head1 VERSION
 
-0.03
+0.0301
 
 =head1 SYNOPSIS
 
@@ -52,7 +52,7 @@ use strict;
 use POE::Component::TFTPd::Client;
 use POE qw/Wheel::UDP Filter::Stream/;
 
-our $VERSION = '0.03';
+our $VERSION = eval '0.0301';
 our %TFTP_ERROR = (
     not_defined         => [0, "Not defined, see error message"],
     unknown_opcode      => [0, "Unknown opcode: %s"],
@@ -96,11 +96,10 @@ sub create {
     $self->{'timeout'}  ||= 10;
     $self->{'retries'}  ||= 3;
     $self->{'clients'}    = {};
-
-    POE::Session->create(
+    $self->{'session'}    = POE::Session->create(
         inline_states => {
             _start => sub {
-                $_[KERNEL]->alias_set($self->{'alias'});
+                $_[KERNEL]->alias_set($self->alias);
                 $_[KERNEL]->delay(check_connections => 1);
             },
         },
@@ -173,13 +172,17 @@ Returns the sender session.
 
 Returns the server: C<POE::Wheel::UDP>.
 
+=head2 session
+
+Returns this session.
+
 =cut
 
 BEGIN {
     no strict 'refs';
 
     my @lvalue = qw/retries timeout max_clients/;
-    my @get    = qw/alias address port clients server sender kernel/;
+    my @get    = qw/alias address port clients kernel server sender session/;
 
     for my $sub (@lvalue) {
         *$sub = sub :lvalue { shift->{$sub} };
@@ -254,6 +257,8 @@ Stops the TFTPd server, by deleting the UDP wheel.
 
 sub stop {
     delete $_[OBJECT]->{'server'};
+    $_[KERNEL]->alias_remove($_[OBJECT]->alias);
+    $_[KERNEL]->alarm_remove_all;
 }
 
 =head2 check_connections
@@ -358,6 +363,7 @@ sub send_data {
     elsif($opname eq 'ack') {
         $opcode = &TFTP_OPCODE_ACK;
         $data   = q();
+        $client->retries = $self->retries;
         $n      = $client->last_block;
         $done   = $client->almost_done;
     }
@@ -370,7 +376,6 @@ sub send_data {
 
     if($bytes) {
         $self->log(trace => $client, "sent $opname $n");
-        $client->retries   = $self->retries;
         $client->timestamp = time;
         $self->cleanup($client) if($done);
     }
@@ -561,9 +566,7 @@ sub TFTP_OPCODE_OACK  { return 6;    }
 
 =head1 AUTHOR
 
-Jan Henning Thorsen, C<< <pm at flodhest.net> >>
-
-=head1 ACKNOWLEDGEMENTS
+Jan Henning Thorsen, C<< <jhthorsen-at-cpan-org> >>
 
 =head1 COPYRIGHT & LICENSE
 
