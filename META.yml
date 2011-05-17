@@ -27,4 +27,4 @@ resources:
   homepage: http://search.cpan.org/dist/POE-Component-TFTPd
   license: http://dev.perl.org/licenses/
   repository: git://github.com//home/repositories/poe-component-tftpd.git
-version: 0.0301
+version: 0.0302

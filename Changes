@@ -1,5 +1,8 @@
 Revision history for Perl module POE-Component-TFTPd
 
+0.0302   Tue May 17 16:22:17 EST 2011
+     - Added patch to stop "Sorcerer's Apprentice Syndrome"
+
 0.0301   Sun Feb  6 19:40:27 CET 2011
      - Applied patch from RT65090, regarding resetting
        $client->retries on ACK instead of server send.

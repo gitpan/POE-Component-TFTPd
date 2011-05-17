@@ -2,7 +2,7 @@ NAME
     POE::Component::TFTPd - A tftp-server, implemented through POE
 
 VERSION
-    0.0301
+    0.0302
 
 SYNOPSIS
      POE::Session->create(
@@ -23,8 +23,11 @@ SYNOPSIS
              },
              tftpd_send    => sub {
                  my $client = $_[ARG0];
-                 read $client->{'fh'}, my $data, $client->block_size;
-                 $_[KERNEL]->post($alias => send_data => $client, $data);
+                 if ($client->{'fh'}) {
+                     seek $client->{'fh'}, $client->last_block * $client->block_size, 0;
+                     read $client->{'fh'}, my $data, $client->block_size;
+                     $_[KERNEL]->post($alias => send_data => $client, $data);
+                 }
              },
              tftpd_receive => sub {
                  my($client, $data) = @_[ARG0,ARG1];
